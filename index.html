@@ -15,6 +15,7 @@
             align-items: center;
             justify-content: center;
             flex-direction: column;
+            overflow: hidden;
         }
 
         .container {
@@ -25,10 +26,11 @@
             margin: 20px;
             text-align: center;
             flex-wrap: wrap;
+            z-index: 1;
         }
 
         .image {
-            max-width: 200px; /* Increased the size of the images */
+            max-width: 200px;
             border-radius: 20px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
             margin: 10px;
@@ -41,7 +43,6 @@
 
         h1 {
             font-size: 3rem;
-            animation: heartbeat 1.5s infinite;
         }
 
         p {
@@ -70,13 +71,54 @@
             transform: scale(1.1);
         }
 
-        @keyframes heartbeat {
-            0%, 100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.2);
-            }
+        #overlay, #noOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            z-index: 10;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: #fff;
+            font-size: 2rem;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        #overlay.show, #noOverlay.show {
+            display: flex;
+        }
+
+        #overlay h1 {
+            color: #ffd700;
+            text-shadow: 0 0 20px #ffd700, 0 0 30px #ff8c00;
+        }
+
+        #youtubeLink {
+            margin-top: 20px;
+            font-size: 1.5rem;
+            color: #ffcc00;
+            text-decoration: none;
+            background: #660000;
+            padding: 10px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            transition: background 0.3s ease;
+        }
+
+        #youtubeLink:hover {
+            background: #ff8c00;
+            color: #fff;
+        }
+
+        #yesVideo, #noVideo {
+            max-width: 80%;
+            max-height: 80%;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -84,7 +126,7 @@
     <div class="container">
         <img src="https://i.imgur.com/Yn00WIA.jpeg" alt="Valentine Image Left" class="image">
         <div class="content">
-            <h1>Will You Be My Valentine? ❤️</h1>
+            <h1>Fresha, will you make me the happiest man in the world and be my valentine? ❤️</h1>
             <p>You make my heart smile every day. Will you make this Valentine's Day extra special by being mine?</p>
             <button id="yesBtn">Yes, I Will!</button>
             <button id="noBtn">Not This Time</button>
@@ -98,13 +140,36 @@
         <img src="https://i.imgur.com/HyM7eWm.jpeg" alt="Valentine Image Right" class="image">
     </div>
 
+    <div id="overlay" onclick="hideOverlay('overlay')">
+        <h1>Fresha, you’ve made me the happiest man alive! ❤️</h1>
+        <p>Thank you for saying yes. You are my everything. 💖</p>
+        <a id="youtubeLink" href="https://www.youtube.com/watch?v=450p7goxZqg" target="_blank">Click here for a special song 💕</a>
+        <video id="yesVideo" autoplay loop muted>
+            <source src="https://i.imgur.com/qQskXdS.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
+    <div id="noOverlay" onclick="hideOverlay('noOverlay')">
+        <video id="noVideo" autoplay loop muted>
+            <source src="https://i.imgur.com/ybfV7wk.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
     <canvas id="confettiCanvas"></canvas>
 
     <script>
         const yesBtn = document.getElementById('yesBtn');
         const noBtn = document.getElementById('noBtn');
+        const overlay = document.getElementById('overlay');
+        const noOverlay = document.getElementById('noOverlay');
+        const yesVideo = document.getElementById('yesVideo');
+        const noVideo = document.getElementById('noVideo');
         const confettiCanvas = document.getElementById('confettiCanvas');
         const ctx = confettiCanvas.getContext('2d');
+
+        let confettiAnimation; // To track the confetti animation loop
 
         confettiCanvas.width = window.innerWidth;
         confettiCanvas.height = window.innerHeight;
@@ -152,17 +217,38 @@
                 piece.update();
                 piece.draw();
             });
-            requestAnimationFrame(animateConfetti);
+            confettiAnimation = requestAnimationFrame(animateConfetti);
+        }
+
+        function stopConfetti() {
+            cancelAnimationFrame(confettiAnimation);
+            ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+        }
+
+        function hideOverlay(overlayId) {
+            document.getElementById(overlayId).classList.remove('show');
+            if (overlayId === 'overlay') {
+                stopConfetti(); // Stop the confetti when the "Yes" overlay is hidden
+                yesVideo.muted = true; // Mute the "Yes" video
+                yesVideo.pause();
+            } else if (overlayId === 'noOverlay') {
+                noVideo.muted = true; // Mute the "No" video
+                noVideo.pause();
+            }
         }
 
         yesBtn.addEventListener('click', () => {
             createConfetti();
             animateConfetti();
-            alert('If u picked the other one I wouldve touched u');
+            overlay.classList.add('show');
+            yesVideo.muted = false; // Unmute the "Yes" video
+            yesVideo.play();
         });
 
         noBtn.addEventListener('click', () => {
-            alert('Well its Opposite Day so imma assume u meant yes');
+            noOverlay.classList.add('show');
+            noVideo.muted = false; // Unmute and play the "No" video
+            noVideo.play();
         });
     </script>
 </body>
